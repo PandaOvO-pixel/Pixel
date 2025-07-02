@@ -1,3 +1,4 @@
+-- Wait until game loaded then start the whole script.
 repeat task.wait() until game:IsLoaded()
 
 --Reduce GPU
@@ -12,7 +13,6 @@ end)
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-repeat task.wait() until not player.PlayerGui:FindFirstChild("__INTRO")
 
 -- Services / Helpers path - more tidy and fast ig/
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -43,57 +43,7 @@ end
 EnterGymEvent()
 --auto run auto 
 game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Gym_Auto"):FireServer(true)
---auto reconnect
--- Auto Reconnect Script for Roblox
--- Place this in an auto-execute script in your executor
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local ReplicatedFirst = game:GetService("ReplicatedFirst")
-local TeleportService = game:GetService("TeleportService")
-
-local placeId = game.PlaceId
-local jobId = game.JobId
-local reconnectAttempts = 0
-local maxReconnectAttempts = 5
-local reconnectDelay = 5 -- seconds between attempts
-
-local function reconnect()
-    if reconnectAttempts >= maxReconnectAttempts then
-        warn("Max reconnect attempts reached. Giving up.")
-        return
-    end
-    
-    reconnectAttempts = reconnectAttempts + 1
-    print("Attempting to reconnect (Attempt "..reconnectAttempts.."/"..maxReconnectAttempts..")")
-    
-    local success, err = pcall(function()
-        TeleportService:TeleportToPlaceInstance(placeId, jobId, LocalPlayer)
-    end)
-    
-    if not success then
-        warn("Reconnect failed: "..tostring(err))
-        task.wait(reconnectDelay)
-        reconnect()
-    end
-end
-
-local function onDisconnected(code)
-    warn("Disconnected from game (Code: "..code.."). Attempting to reconnect...")
-    reconnect()
-end
-
--- Set up connection monitoring
-LocalPlayer.OnTeleport:Connect(function(teleportState)
-    if teleportState == Enum.TeleportState.Failed then
-        warn("Teleport failed. Attempting to reconnect...")
-        reconnect()
-    end
-end)
-
-game:GetService("NetworkClient").Disconnected:Connect(onDisconnected)
-
-print("Auto-reconnect script loaded. Will attempt to reconnect if disconnected.")
 -- Auto buy all zones
 task.spawn(function()
     while true do
@@ -102,7 +52,6 @@ task.spawn(function()
                 ZonePurchase:InvokeServer("GymEvent", Zones)
             end)
         end
-        task.wait(1)
     end
 end)
 
@@ -112,7 +61,6 @@ task.spawn(function()
         pcall(function()
             GymRebirth:InvokeServer()
         end)
-        task.wait(1)
     end
 end)
 
@@ -137,7 +85,6 @@ local args = {
         ["Strength"] = 53
     }
 }
-
 game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Gym_SettingsUpdate"):FireServer(unpack(args))
 end
 --Go Area 5
